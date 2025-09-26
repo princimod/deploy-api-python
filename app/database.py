@@ -15,8 +15,9 @@ DB_PASSWORD = os.getenv("MYSQL_ROOT_PASSWORD", 1234)
 DB_HOST = os.getenv("DB_HOST", "db")         # <- chave: usa "db"
 DB_PORT = os.getenv("DB_PORT", "3306")
 DB_NAME = os.getenv("MYSQL_DATABASE", "test_db")
+DB_DRIVER = os.getenv("DB_DRIVER", "mysql+pymysql")
 
-DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+DATABASE_URL = f"{DB_DRIVER}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 engine = create_engine(DATABASE_URL, echo=True, future=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
