@@ -1,8 +1,25 @@
-version: "3.9"
+
 services:
-  web:
+  api:
     build: .
-    restart: unless-stopped
+    container_name: fastapi_app
+    env_file: .env
     ports:
-      - "8000:8000"                     # host:container (Gunicorn rodando na 80)
-    
+      - "8000:8000" 
+    depends_on:
+      - db    # Garantir que o banco de dados inicie antes da API
+    volumes:
+      - .:/app    # Monta o diretório atual no contêiner para desenvolvimento
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    env_file: .env
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql # Persistência de dados
+  
+volumes:
+    db_data:
