@@ -2,15 +2,17 @@
 services:
   api:
     build: .
-    container_name: deploy_python
+    image: python_api
+    container_name: python_api
     env_file: .env
     ports:
       - "8000:8000" 
     depends_on:
-      - db    # Garantir que o banco de dados inicie antes da API
+      db:
+        condition: service_healthy # Garante que o DB esteja saudável
     volumes:
-      - .:/app    # Monta o diretório atual no contêiner para desenvolvimento
-    restart: unless-stopped
+      - .:/app # Monta o diretório atual no container
+    restart: unless-stopped # Reinicia o container a menos que seja parado manualmente
 
   db:
     image: mysql:8.0
@@ -19,7 +21,20 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql # Persistência de dados
-  
+      - db_data:/var/lib/mysql # Persistência de dados    
+    command: 
+      [ 
+        "mysqld", # Comando para iniciar o MySQL
+        "--default-authentication-plugin=mysql_native_password", # Compatibilidade de autenticação
+        "--lower_case_table_names=1" # Sensibilidade a maiúsculas/minúsculas
+      ]
+    
+    # Healthcheck para saber se o MySQL está pronto
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$$MYSQL_USER", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
     db_data:
